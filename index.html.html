@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robot Learn - Plataforma de Robótica</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #f3f4f6 0%, #d1d5db 42%, #9ca3af 100%);
+      color: #111827;
+    }
+
+    header {
+      background: linear-gradient(135deg, #111827, #374151, #6b7280);
+      color: white;
+      padding: 28px 20px;
+      text-align: center;
+      border-bottom: 4px solid #60a5fa;
+      position: relative;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      flex-wrap: wrap;
+    }
+
+    .header-text {
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      font-size: 17px;
+      color: #e5e7eb;
+    }
+
+    .robot-icon {
+      display: inline-block;
+      animation: robotFloat 2.5s ease-in-out infinite, robotGlow 1.8s ease-in-out infinite alternate;
+      transform-origin: center;
+    }
+
+    @keyframes robotFloat {
+      0% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-6px) rotate(-4deg); }
+      50% { transform: translateY(0) rotate(0deg); }
+      75% { transform: translateY(-6px) rotate(4deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    @keyframes robotGlow {
+      from { text-shadow: 0 0 6px rgba(147, 197, 253, 0.6); }
+      to { text-shadow: 0 0 18px rgba(96, 165, 250, 1); }
+    }
+
+    .created-by {
+      margin-top: 16px;
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 10px 16px;
+      border-radius: 999px;
+      color: #f9fafb;
+      font-size: 14px;
+      backdrop-filter: blur(8px);
+    }
+
+    .floating-robot {
+      position: fixed;
+      right: 25px;
+      bottom: 25px;
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, #111827, #374151);
+      border: 2px solid #60a5fa;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 45px;
+      box-shadow: 0 12px 30px rgba(17, 24, 39, 0.35);
+      animation: robotMove 3s ease-in-out infinite;
+      z-index: 20;
+      transition: 0.3s ease;
+    }
+
+    .floating-robot::after {
+      content: "Aprende robótica";
+      position: absolute;
+      right: 95px;
+      bottom: 20px;
+      width: 145px;
+      background: #111827;
+      color: white;
+      font-size: 13px;
+      padding: 9px 12px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(17, 24, 39, 0.25);
+    }
+
+    @keyframes robotMove {
+      0% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-14px) scale(1.04); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    .floating-robot.happy {
+      background: linear-gradient(135deg, #0f766e, #22c55e);
+      border-color: #86efac;
+      animation: robotHappy 0.8s ease-in-out;
+    }
+
+    .floating-robot.sad {
+      background: linear-gradient(135deg, #7f1d1d, #dc2626);
+      border-color: #fecaca;
+      animation: robotSad 0.8s ease-in-out;
+    }
+
+    .floating-robot.celebrate {
+      background: linear-gradient(135deg, #1d4ed8, #f59e0b, #22c55e);
+      border-color: #fde68a;
+      animation: robotCelebrate 1.5s ease-in-out infinite;
+    }
+
+    @keyframes robotHappy {
+      0% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.15) rotate(-8deg); }
+      50% { transform: scale(1.2) rotate(8deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    @keyframes robotSad {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-8px) rotate(-5deg); }
+      50% { transform: translateX(8px) rotate(5deg); }
+      75% { transform: translateX(-5px) rotate(-3deg); }
+      100% { transform: translateX(0); }
+    }
+
+    @keyframes robotCelebrate {
+      0% { transform: translateY(0) rotate(0deg) scale(1); }
+      25% { transform: translateY(-18px) rotate(-10deg) scale(1.12); }
+      50% { transform: translateY(0) rotate(10deg) scale(1.18); }
+      75% { transform: translateY(-14px) rotate(-8deg) scale(1.12); }
+      100% { transform: translateY(0) rotate(0deg) scale(1); }
+    }
+
+    .celebration-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: #111827;
+      color: white;
+      padding: 26px 34px;
+      border-radius: 22px;
+      box-shadow: 0 16px 40px rgba(17, 24, 39, 0.45);
+      text-align: center;
+      z-index: 50;
+      border: 3px solid #60a5fa;
+      transition: 0.4s ease;
+    }
+
+    .celebration-message.show {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .celebration-message h2 {
+      font-size: 30px;
+      margin-bottom: 8px;
+      color: #93c5fd;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .intro {
+      background: rgba(255, 255, 255, 0.92);
+      padding: 28px;
+      border-radius: 20px;
+      box-shadow: 0 10px 28px rgba(17, 24, 39, 0.18);
+      margin-bottom: 28px;
+      border-left: 7px solid #60a5fa;
+    }
+
+    .intro h2 {
+      color: #111827;
+      margin-bottom: 12px;
+      font-size: 27px;
+    }
+
+    .intro p {
+      line-height: 1.7;
+      color: #374151;
+      font-size: 16px;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat {
+      background: #111827;
+      color: white;
+      padding: 18px;
+      border-radius: 16px;
+      box-shadow: 0 8px 22px rgba(17, 24, 39, 0.20);
+    }
+
+    .stat span {
+      display: block;
+      color: #93c5fd;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .stat strong {
+      font-size: 22px;
+    }
+
+    .progress {
+      background: #e5e7eb;
+      border-radius: 22px;
+      overflow: hidden;
+      margin-bottom: 28px;
+      border: 1px solid #9ca3af;
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, #111827, #2563eb);
+      color: white;
+      width: 0%;
+      padding: 10px;
+      text-align: center;
+      transition: 0.4s;
+      font-weight: bold;
+    }
+
+    .modules {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+      gap: 22px;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 24px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(17, 24, 39, 0.16);
+      transition: 0.3s;
+      cursor: pointer;
+      border-top: 6px solid #374151;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      width: 90px;
+      height: 90px;
+      right: -25px;
+      top: -25px;
+      background: rgba(96, 165, 250, 0.18);
+      border-radius: 50%;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-top-color: #2563eb;
+    }
+
+    .card.locked {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .card h3 {
+      color: #111827;
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+
+    .card p {
+      font-size: 15px;
+      line-height: 1.55;
+      color: #4b5563;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-bottom: 12px;
+      background: #e0f2fe;
+      color: #075985;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .lesson-box, .quiz-box, .result-box {
+      background: rgba(255, 255, 255, 0.96);
+      padding: 28px;
+      border-radius: 20px;
+      box-shadow: 0 10px 28px rgba(17, 24, 39, 0.18);
+      margin-bottom: 25px;
+      display: none;
+      border-left: 7px solid #2563eb;
+    }
+
+    .lesson-box h2, .quiz-box h2, .result-box h2 {
+      color: #111827;
+      margin-bottom: 15px;
+    }
+
+    .lesson-box p, .quiz-box p, .result-box p {
+      line-height: 1.75;
+      color: #374151;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #111827, #2563eb);
+      color: white;
+      border: none;
+      padding: 13px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 14px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #1f2937, #1d4ed8);
+    }
+
+    .option {
+      display: block;
+      background: #f9fafb;
+      padding: 14px;
+      margin: 11px 0;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      cursor: pointer;
+      transition: 0.2s;
+      color: #1f2937;
+    }
+
+    .option:hover {
+      background: #e5e7eb;
+      border-color: #60a5fa;
+    }
+
+    .feedback {
+      font-weight: bold;
+      margin-top: 13px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 22px;
+      color: #1f2937;
+      font-size: 14px;
+    }
+
+    @media (max-width: 700px) {
+      header h1 { font-size: 34px; }
+      .floating-robot { width: 72px; height: 72px; font-size: 36px; right: 15px; bottom: 15px; }
+      .floating-robot::after { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-robot" id="floatingRobot">🤖</div>
+
+  <div class="celebration-message" id="celebrationMessage">
+    <h2>🎉 ¡Curso completado!</h2>
+    <p>El robot celebra porque alcanzaste el 100% del progreso.</p>
+  </div>
+
+  <header>
+    <div class="header-content">
+      <div class="header-text">
+        <h1><span class="robot-icon">🤖</span> Robot Learn</h1>
+        <p>Aprende robótica y pensamiento computacional jugando y explorando</p>
+        <div class="created-by">Creada por el Grupo 5 | Agamez, Fernández y Ortiz</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="intro">
+      <h2>Aprendizaje interactivo para grado octavo</h2>
+      <p>Robot Learn es una plataforma educativa inspirada en ambientes virtuales de aprendizaje gamificados, donde los estudiantes pueden fortalecer habilidades de robótica, programación y pensamiento computacional mediante retos, módulos interactivos y cuestionarios dinámicos. La propuesta busca acercar la educación STEM a estudiantes de grado octavo de manera sencilla, visual y entretenida.</p>
+    </section>
+
+    <section class="dashboard">
+      <div class="stat"><span>Modalidad</span><strong>Gamificada</strong></div>
+      <div class="stat"><span>Nivel</span><strong>Grado Octavo</strong></div>
+      <div class="stat"><span>Evaluación</span><strong>Cuestionario</strong></div>
+      <div class="stat"><span>Módulos</span><strong>4 niveles</strong></div>
+    </section>
+
+    <div class="progress" aria-label="Progreso del curso">
+      <div class="progress-bar" id="progressBar">0%</div>
+    </div>
+
+    <section class="modules" id="modulesBox"></section>
+
+    <section class="lesson-box" id="lessonBox">
+      <h2 id="lessonTitle"></h2>
+      <p id="lessonContent"></p>
+      <button type="button" onclick="startQuiz()">Iniciar evaluación</button>
+    </section>
+
+    <section class="quiz-box" id="quizBox">
+      <h2>Evaluación del módulo</h2>
+      <p id="questionText"></p>
+      <div id="optionsBox"></div>
+      <p class="feedback" id="feedback"></p>
+      <button type="button" onclick="nextQuestion()" id="nextBtn" style="display:none;">Siguiente pregunta</button>
+    </section>
+
+    <section class="result-box" id="resultBox">
+      <h2>Resultado del módulo</h2>
+      <p id="scoreText"></p>
+      <button type="button" onclick="goToModules()" id="modulesBtn">Ver módulos</button>
+    </section>
+  </main>
+
+  <footer>
+    Robot Learn | Plataforma educativa gamificada para robótica y pensamiento computacional | Grado Octavo
+  </footer>
+
+  <script>
+    const lessons = [
+      {
+        title: "Módulo 1: Introducción a la robótica",
+        shortTitle: "Introducción a la robótica",
+        description: "Descubre cómo los robots ayudan a resolver problemas y cómo se relacionan con la tecnología actual.",
+        content: "La robótica estudia cómo diseñar y controlar máquinas capaces de realizar tareas con cierto grado de autonomía. Un robot puede recibir información del entorno, procesarla y responder mediante instrucciones programadas. Por eso, la robótica combina conocimientos de tecnología, electrónica, mecánica, programación y solución de problemas. En la vida cotidiana, los robots aparecen en fábricas, hospitales, hogares, agricultura, exploración espacial y educación. Para grado octavo, lo más importante es comprender que un robot no es solo una máquina con forma humana, sino un sistema que percibe, procesa y actúa para cumplir un objetivo.",
+        questions: [
+          {
+            q: "¿Cuál característica diferencia mejor a un robot de una máquina mecánica convencional?",
+            options: [
+              "Su capacidad para recibir información, procesarla y ejecutar acciones",
+              "Su tamaño reducido y diseño moderno",
+              "El hecho de funcionar únicamente con energía eléctrica"
+            ],
+            answer: 0
+          },
+          {
+            q: "¿Por qué la robótica se relaciona con la educación STEM?",
+            options: [
+              "Porque integra ciencia, tecnología, ingeniería y matemáticas para resolver problemas",
+              "Porque solo estudia dibujos de robots futuristas",
+              "Porque elimina la necesidad de aprender programación"
+            ],
+            answer: 0
+          }
+        ]
+      },
+      {
+        title: "Módulo 2: Componentes de un robot",
+        shortTitle: "Componentes de un robot",
+        description: "Aprende cómo funcionan los sensores, motores y sistemas de control dentro de un robot.",
+        content: "Un robot está formado por varios componentes que trabajan juntos. La estructura es el cuerpo que sostiene las partes físicas. Los sensores permiten captar información del ambiente, como luz, distancia, temperatura o movimiento. Los actuadores, como motores o servomotores, producen acciones físicas. La unidad de control funciona como el cerebro del sistema, porque interpreta los datos y ejecuta las instrucciones programadas. Cuando estos elementos se conectan correctamente, el robot puede responder de forma organizada ante diferentes situaciones.",
+        questions: [
+          {
+            q: "En un sistema robótico, ¿qué relación existe entre sensores, controlador y actuadores?",
+            options: [
+              "Los sensores captan datos, el controlador los procesa y los actuadores ejecutan acciones",
+              "Los actuadores analizan datos y los sensores producen movimiento",
+              "El controlador solo cumple una función estética dentro del sistema"
+            ],
+            answer: 0
+          },
+          {
+            q: "¿Qué problema podría presentarse si un robot tiene buenos motores, pero sensores deficientes?",
+            options: [
+              "Podría moverse sin interpretar correctamente el entorno",
+              "No podría tener una estructura física",
+              "Dejaría de necesitar instrucciones"
+            ],
+            answer: 0
+          }
+        ]
+      },
+      {
+        title: "Módulo 3: Sensores y movimiento",
+        shortTitle: "Sensores y movimiento",
+        description: "Comprende cómo un robot detecta información del entorno y responde mediante acciones programadas.",
+        content: "Los sensores permiten que el robot perciba lo que ocurre a su alrededor. Por ejemplo, un sensor de distancia puede detectar obstáculos, un sensor de luz puede identificar cambios de iluminación y un sensor de temperatura puede medir calor. Luego, el controlador analiza esa información y decide qué acción realizar. El movimiento ocurre gracias a los actuadores, como motores, ruedas, brazos o pinzas. Esta relación entre percepción y movimiento permite que un robot siga una línea, evite obstáculos o responda a una señal del ambiente.",
+        questions: [
+          {
+            q: "¿Qué describe mejor la relación entre percepción y acción en robótica?",
+            options: [
+              "El robot interpreta datos del entorno y responde mediante mecanismos físicos o señales",
+              "El robot actúa sin necesidad de información previa",
+              "La percepción solo sirve para mejorar el diseño visual del robot"
+            ],
+            answer: 0
+          },
+          {
+            q: "Si un robot detecta un obstáculo y cambia su ruta, ¿qué proceso está realizando?",
+            options: [
+              "Usa datos del entorno para modificar su acción",
+              "Ejecuta una acción aleatoria sin control",
+              "Depende únicamente de su color externo"
+            ],
+            answer: 0
+          }
+        ]
+      },
+      {
+        title: "Módulo 4: Programación y pensamiento computacional",
+        shortTitle: "Programación y pensamiento computacional",
+        description: "Desarrolla habilidades para crear secuencias lógicas y resolver problemas paso a paso.",
+        content: "Programar un robot significa darle instrucciones claras para que realice una tarea. Estas instrucciones pueden organizarse como secuencias, condiciones y repeticiones. Una secuencia indica pasos ordenados; una condición permite tomar decisiones, por ejemplo: si detecta un obstáculo, entonces se detiene; y una repetición permite ejecutar una acción varias veces. Todo esto se relaciona con el pensamiento computacional, porque ayuda a descomponer problemas, reconocer patrones, abstraer información importante y diseñar algoritmos. Así, los estudiantes aprenden a pensar de forma lógica antes de construir una solución tecnológica.",
+        questions: [
+          {
+            q: "¿Qué función cumple una condición dentro de la programación robótica?",
+            options: [
+              "Permite que el robot tome decisiones según una situación específica",
+              "Hace que el robot ignore los datos del entorno",
+              "Sirve únicamente para cambiar el material físico del robot"
+            ],
+            answer: 0
+          },
+          {
+            q: "¿Cuál ejemplo representa mejor una lógica condicional en robótica?",
+            options: [
+              "Si el sensor detecta un obstáculo, entonces el robot se detiene",
+              "El robot tiene una carcasa metálica",
+              "El robot se enciende sin ejecutar instrucciones"
+            ],
+            answer: 0
+          }
+        ]
+      }
+    ];
+
+    let currentLesson = 0;
+    let currentQuestion = 0;
+    let score = 0;
+    let completedLessons = 0;
+    let questionAnswered = false;
+    let autoAdvanceTimer = null;
+
+    function safeGetElement(id) {
+      const element = document.getElementById(id);
+      if (!element) {
+        throw new Error(`No se encontró el elemento con id: ${id}`);
+      }
+      return element;
+    }
+
+    function isValidLessonIndex(index) {
+      return Number.isInteger(index) && index >= 0 && index < lessons.length;
+    }
+
+    function shuffleArray(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function renderModules() {
+      const modulesBox = safeGetElement("modulesBox");
+      modulesBox.innerHTML = "";
+
+      lessons.forEach((lesson, index) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          <span class="badge">Módulo ${index + 1}</span>
+          <h3>${lesson.shortTitle}</h3>
+          <p>${lesson.description}</p>
+        `;
+        card.onclick = () => openLesson(index);
+        modulesBox.appendChild(card);
+      });
+    }
+
+    function updateProgress() {
+      const progress = Math.min((completedLessons / lessons.length) * 100, 100);
+      safeGetElement("progressBar").style.width = progress + "%";
+      safeGetElement("progressBar").innerText = Math.round(progress) + "%";
+      return progress;
+    }
+
+    function hideAllMainBoxes() {
+      safeGetElement("lessonBox").style.display = "none";
+      safeGetElement("quizBox").style.display = "none";
+      safeGetElement("resultBox").style.display = "none";
+    }
+
+    function openLesson(index) {
+      if (autoAdvanceTimer) {
+        clearTimeout(autoAdvanceTimer);
+        autoAdvanceTimer = null;
+      }
+
+      if (!isValidLessonIndex(index)) {
+        console.warn("Intento de abrir un módulo inexistente:", index);
+        goToModules();
+        return;
+      }
+
+      currentLesson = index;
+      currentQuestion = 0;
+      score = 0;
+      questionAnswered = false;
+
+      const lesson = lessons[currentLesson];
+      safeGetElement("lessonTitle").innerText = lesson.title;
+      safeGetElement("lessonContent").innerText = lesson.content;
+
+      hideAllMainBoxes();
+      safeGetElement("lessonBox").style.display = "block";
+      window.scrollTo({ top: safeGetElement("lessonBox").offsetTop, behavior: "smooth" });
+    }
+
+    function startQuiz() {
+      if (!isValidLessonIndex(currentLesson)) {
+        goToModules();
+        return;
+      }
+
+      currentQuestion = 0;
+      score = 0;
+      questionAnswered = false;
+      hideAllMainBoxes();
+      safeGetElement("quizBox").style.display = "block";
+      showQuestion();
+    }
+
+    function showQuestion() {
+      if (!isValidLessonIndex(currentLesson)) {
+        goToModules();
+        return;
+      }
+
+      const lesson = lessons[currentLesson];
+      if (!lesson.questions || currentQuestion < 0 || currentQuestion >= lesson.questions.length) {
+        showResult();
+        return;
+      }
+
+      questionAnswered = false;
+      const question = lesson.questions[currentQuestion];
+      safeGetElement("questionText").innerText = question.q;
+      safeGetElement("optionsBox").innerHTML = "";
+      safeGetElement("feedback").innerText = "";
+      safeGetElement("nextBtn").style.display = "none";
+
+      const mixedOptions = shuffleArray(
+        question.options.map((option, index) => ({
+          text: option,
+          correct: index === question.answer
+        }))
+      );
+
+      mixedOptions.forEach((option) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "option";
+        btn.innerText = option.text;
+        btn.onclick = () => checkAnswer(option.correct, btn);
+        safeGetElement("optionsBox").appendChild(btn);
+      });
+    }
+
+    function checkAnswer(isCorrect, selectedOption) {
+      if (questionAnswered) return;
+      questionAnswered = true;
+
+      const feedback = safeGetElement("feedback");
+      document.querySelectorAll(".option").forEach(option => {
+        option.style.pointerEvents = "none";
+        option.disabled = true;
+      });
+
+      if (isCorrect) {
+        selectedOption.style.background = "#dcfce7";
+        selectedOption.style.borderColor = "#22c55e";
+        feedback.innerText = "✅ Correcto. El robot está feliz porque comprendiste el concepto.";
+        feedback.style.color = "#2563eb";
+        score++;
+        changeRobotMood("happy");
+      } else {
+        selectedOption.style.background = "#fee2e2";
+        selectedOption.style.borderColor = "#dc2626";
+        feedback.innerText = "❌ Incorrecto. El robot está triste, pero puedes seguir aprendiendo.";
+        feedback.style.color = "#b91c1c";
+        changeRobotMood("sad");
+      }
+
+      safeGetElement("nextBtn").style.display = "inline-block";
+    }
+
+    function nextQuestion() {
+      if (!isValidLessonIndex(currentLesson)) {
+        goToModules();
+        return;
+      }
+
+      currentQuestion++;
+      const lesson = lessons[currentLesson];
+
+      if (currentQuestion < lesson.questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      if (!isValidLessonIndex(currentLesson)) {
+        goToModules();
+        return;
+      }
+
+      hideAllMainBoxes();
+      safeGetElement("resultBox").style.display = "block";
+
+      const lesson = lessons[currentLesson];
+      completedLessons = Math.max(completedLessons, currentLesson + 1);
+      const progress = updateProgress();
+
+      if (currentLesson < lessons.length - 1) {
+        safeGetElement("scoreText").innerText = `Obtuviste ${score} de ${lesson.questions.length} respuestas correctas. En unos segundos pasarás al siguiente módulo.`;
+        const nextIndex = currentLesson + 1;
+        autoAdvanceTimer = setTimeout(() => openLesson(nextIndex), 2500);
+      } else {
+        safeGetElement("scoreText").innerText = `Obtuviste ${score} de ${lesson.questions.length} respuestas correctas. Completaste todos los módulos de Robot Learn.`;
+        if (progress === 100) {
+          celebrateCompletion();
+        }
+      }
+    }
+
+    function changeRobotMood(mood) {
+      const robot = safeGetElement("floatingRobot");
+      robot.classList.remove("happy", "sad", "celebrate");
+
+      if (mood === "happy") {
+        robot.innerText = "😄";
+        robot.classList.add("happy");
+      } else if (mood === "sad") {
+        robot.innerText = "😢";
+        robot.classList.add("sad");
+      }
+
+      setTimeout(() => {
+        if (!robot.classList.contains("celebrate")) {
+          robot.innerText = "🤖";
+          robot.classList.remove("happy", "sad");
+        }
+      }, 1200);
+    }
+
+    function celebrateCompletion() {
+      const robot = safeGetElement("floatingRobot");
+      const message = safeGetElement("celebrationMessage");
+      robot.innerText = "🎉";
+      robot.classList.remove("happy", "sad");
+      robot.classList.add("celebrate");
+      message.classList.add("show");
+
+      setTimeout(() => {
+        message.classList.remove("show");
+      }, 3500);
+    }
+
+    function goToModules() {
+      if (autoAdvanceTimer) {
+        clearTimeout(autoAdvanceTimer);
+        autoAdvanceTimer = null;
+      }
+      hideAllMainBoxes();
+      window.scrollTo({ top: safeGetElement("modulesBox").offsetTop, behavior: "smooth" });
+    }
+
+    function runTests() {
+      console.assert(Array.isArray(lessons), "TEST 1: lessons debe ser un arreglo");
+      console.assert(lessons.length === 4, "TEST 2: deben existir 4 módulos");
+      console.assert(lessons.every(lesson => Array.isArray(lesson.questions) && lesson.questions.length > 0), "TEST 3: cada módulo debe tener preguntas");
+      console.assert(isValidLessonIndex(0) === true, "TEST 4: el módulo 0 debe ser válido");
+      console.assert(isValidLessonIndex(lessons.length) === false, "TEST 5: no debe permitir abrir un módulo fuera del arreglo");
+      const sample = [1, 2, 3];
+      const shuffled = shuffleArray(sample);
+      console.assert(sample.length === shuffled.length, "TEST 6: shuffle debe conservar la cantidad de opciones");
+      console.assert(sample.join(",") === "1,2,3", "TEST 7: shuffle no debe modificar el arreglo original");
+      console.log("Pruebas internas de Robot Learn completadas correctamente.");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderModules();
+      updateProgress();
+      runTests();
+    });
+  </script>
+</body>
+</html>
